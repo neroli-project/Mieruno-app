@@ -234,6 +234,47 @@
         window.addEventListener('load', () => {
             initCamera();
         });
+
+
+let holdTimer = null;
+        let isHolding = false;
+
+        // タッチ開始（長押し判定のスタート）
+        appContainer.addEventListener('touchstart', (e) => {
+            isHolding = false;
+            holdTimer = setTimeout(() => {
+                isHolding = true;
+                // --- 【長押し時の処理】 ---
+                // 1. 喋っている音声を即座に停止
+                window.speechSynthesis.cancel();
+                // 2. 状態をリセット
+                updateStatus("停止しました。");
+                speak("停止しました。");
+                // 処理中フラグも強制解除
+                isProcessing = false;
+            }, 600); // 0.6秒長押ししたら発動
+        }, { passive: true });
+
+        // タッチ終了（指を離したとき）
+        appContainer.addEventListener('touchend', (e) => {
+            // タイマーが発動する前に指を離したら、それは「長押しではない（通常のタップ）」とみなす
+            clearTimeout(holdTimer);
+        }, { passive: true });
+
+        // タッチがキャンセルされたとき（スクロール等で外れた場合など）
+        appContainer.addEventListener('touchcancel', (e) => {
+            clearTimeout(holdTimer);
+        }, { passive: true });
+
+// 既存のタップ判定の最初に入れるガード
+        appContainer.addEventListener('click', (e) => {
+            if (isHolding) {
+                // 長押し操作の直後だったら、通常のタップ判定は無視する
+                isHolding = false;
+                return;
+            }
+            // ... （ここから下のシングル・ダブルタップ判定へ続く）
+        });
     </script>
 </body>
 </html>
