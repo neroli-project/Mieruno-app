@@ -1,0 +1,9 @@
+{
+  "name": "hitokoto-app",
+  "version": "1.0.0",
+  "description": "Voice camera assistant for visually impaired",
+  "main": "index.js",
+  "dependencies": {
+    "@google/genai": "^0.1.1"
+  }
+}
