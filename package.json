@@ -1,6 +1,7 @@
 {
   "name": "hitokoto-app",
   "version": "1.0.0",
+  "type": "module",
   "description": "Voice camera assistant for visually impaired",
   "main": "index.js",
   "dependencies": {
