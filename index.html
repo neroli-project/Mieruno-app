@@ -94,6 +94,8 @@
         // Vercel上のAPIエンドポイント（必要に応じてパスを変更してください）
         const API_ENDPOINT = '/api/analyze'; 
 
+        let hasStarted = false; // 起動時の初回タップ判定用
+
         // 1. カメラの起動
         async function initCamera() {
             try {
@@ -104,16 +106,38 @@
                 video.srcObject = stream;
                 
                 video.onloadedmetadata = () => {
-                    updateStatus("準備完了。画面をタップしてください。");
-                    // 起動時の最初の案内。ここで初めてユーザーがタップするため音声が必ず許可されます
-                    speak("起動しました。画面をどこでもいいのでタップして、周囲を確認してください。");
+                    // ここでは音声を出さず、文字だけ表示（自動再生ブロック対策）
+                    updateStatus("準備完了。画面をどこでもタップしてください。");
                 };
             } catch (err) {
                 console.error("カメラの起動に失敗しました:", err);
                 updateStatus("カメラの起動に失敗しました。");
-                speak("カメラの起動に失敗しました。");
             }
         }
+
+        // 5. タップ判定（修正版）
+        appContainer.addEventListener('click', (e) => {
+            // 【重要】もしまだ一度もスタートしていないなら、最初のタップで音声を解禁する
+            if (!hasStarted) {
+                hasStarted = true;
+                speak("起動しました。周囲を確認します。");
+                analyzeScene(false);
+                return;
+            }
+
+            // ここから下は、2回目以降の通常のシングル・ダブルタップ判定
+            tapCount++;
+            if (tapCount === 1) {
+                tapTimer = setTimeout(() => {
+                    if (tapCount === 1) {
+                        analyzeScene(false); // 1回タップ：一言解説
+                    } else if (tapCount >= 2) {
+                        analyzeScene(true);  // 2回タップ：詳細解説
+                    }
+                    tapCount = 0;
+                }, 300);
+            }
+        });
 
         // 2. 音声合成（Text-to-Speech）＋ 割り込み制御
         function speak(text) {
