@@ -98,19 +98,19 @@
         async function initCamera() {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: 'environment' }, // 背面カメラを優先
+                    video: { facingMode: 'environment' },
                     audio: false
                 });
                 video.srcObject = stream;
                 
-                // 映像の準備ができたら起動時の一言解説を実行
                 video.onloadedmetadata = () => {
-                    speak("起動しました。周囲の状況を確認しています。");
-                    analyzeScene(false); // 起動時は一言
+                    updateStatus("準備完了。画面をタップしてください。");
+                    // 起動時の最初の案内。ここで初めてユーザーがタップするため音声が必ず許可されます
+                    speak("起動しました。画面をどこでもいいのでタップして、周囲を確認してください。");
                 };
             } catch (err) {
                 console.error("カメラの起動に失敗しました:", err);
-                updateStatus("カメラの起動に失敗しました。権限を確認してください。");
+                updateStatus("カメラの起動に失敗しました。");
                 speak("カメラの起動に失敗しました。");
             }
         }
